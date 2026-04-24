@@ -4,8 +4,9 @@ from pydantic import BaseModel
 import pandas as pd
 import joblib
 import shap
-import os
 from dotenv import load_dotenv
+import os
+GROQ_API_KEY=os.getenv("GROQ_API_KEY")
 # BaseModel defines the shape of incoming user request
 # Pydantic model describes what input API expects
 
@@ -55,6 +56,7 @@ def prepare_input(data: MachineInput) -> pd.DataFrame:
 # Now, natural language explanations
 import httpx
 
+
 async def generate_explanation(prob:float,risk_level:str,shap_dict:dict,data: MachineInput)->str:
     prompt=f"""
     You are a predictive maintenance expert. Explain this machine health prediction in simple, actionable language.
@@ -78,7 +80,7 @@ async def generate_explanation(prob:float,risk_level:str,shap_dict:dict,data: Ma
     """
 
     async with httpx.AsyncClient() as client:
-        GROQ_API_KEY=os.getenv("GROQ_API_KEY")
+        # GROQ_API_KEY=os.getenv("GROQ_API_KEY")
         response=await client.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers={
@@ -91,6 +93,11 @@ async def generate_explanation(prob:float,risk_level:str,shap_dict:dict,data: Ma
                 "messages":[{"role":"user","content":prompt}]
             }
         )
+
+    result = response.json()
+    if "choices" not in result:
+        return "Unable to generate explanation at this time."
+    return result["choices"][0]["message"]["content"]
 
     return response.json()["choices"][0]["message"]["content"]
     # print(response.json)
