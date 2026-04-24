@@ -5,6 +5,8 @@ import pandas as pd
 import joblib
 import shap
 from dotenv import load_dotenv
+
+load_dotenv()
 import os
 GROQ_API_KEY=os.getenv("GROQ_API_KEY")
 # BaseModel defines the shape of incoming user request
